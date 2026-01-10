@@ -32,22 +32,19 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Override
     public void requestOtp(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with this email"));
 
-        userRepository.findByEmail(email).ifPresent(user -> {
+        String otp = OtpGenerator.generateOtp();
 
-            String otp = OtpGenerator.generateOtp();
+        PasswordResetOtp resetOtp = PasswordResetOtp.builder()
+                .email(email)
+                .otpHash(passwordEncoder.encode(otp))
+                .expiresAt(LocalDateTime.now().plusMinutes(5))
+                .build();
 
-            PasswordResetOtp resetOtp = PasswordResetOtp.builder()
-                    .email(email)
-                    .otpHash(passwordEncoder.encode(otp))
-                    .expiresAt(LocalDateTime.now().plusMinutes(5))
-                    .build();
-
-            otpRepository.save(resetOtp);
-
-            // TODO: Replace with email sender
-            emailService.sendOtpEmail(email, otp);
-        });
+        otpRepository.save(resetOtp);
+        emailService.sendOtpEmail(email, otp);
     }
 
 
