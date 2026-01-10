@@ -31,7 +31,6 @@ public class UserServiceImpl implements UserService {
             throw new AppException("User already registered", HttpStatus.BAD_REQUEST);
         }
 
-        // Create a new user
         User user = new User();
         user.setEmail(dto.getEmail());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword())); // HASH PASSWORD
